@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Complaint - Civic Issues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding-top: 120px;
+        }
+        .navbar {
+            background: #1e293b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .navbar .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .navbar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .main-heading {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+        .search-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .search-btn {
+            padding: 1rem 2rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        .search-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+        .details-card, .timeline-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .complaint-id {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            font-family: 'Courier New', monospace;
+        }
+        .badges-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        .badge.category.water {
+            background-color: #007bff;
+        }
+        .badge.category.electricity {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge.category.internet {
+            background-color: #28a745;
+        }
+        .badge.category.other {
+            background-color: #6c757d;
+        }
+        .badge.urgency.high {
+            background-color: #dc3545;
+        }
+        .badge.urgency.medium {
+            background-color: #fd7e14;
+        }
+        .badge.urgency.low {
+            background-color: #28a745;
+        }
+        .badge.status.pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge.status.resolved {
+            background-color: #28a745;
+        }
+        .badge.status.in-progress {
+            background-color: #007bff;
+        }
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .field-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .field-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .field-value {
+            font-size: 1rem;
+            color: #0f172a;
+            font-weight: 500;
+        }
+        .description-section {
+            margin-bottom: 2rem;
+        }
+        .description-text {
+            color: #475569;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        .entities-section {
+            margin-bottom: 2rem;
+        }
+        .entities-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .entity-tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+        }
+        .timeline {
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            padding-bottom: 2rem;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 7px;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #e2e8f0;
+        }
+        .timeline-content {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .timeline-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+        .timeline-time {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .no-results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        .no-results-text {
+            font-size: 1.1rem;
+        }
+        @media (max-width: 1024px) {
+            .results-section {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+            .main-heading {
+                font-size: 2.5rem;
+            }
+            .search-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .search-input, .search-btn {
+                width: 100%;
+            }
+            .field-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .details-card, .timeline-card {
+                padding: 2rem;
+            }
+        }
+        .image-section {
+            margin-top: 2rem;
+        }
+        .image-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        .complaint-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">CIVIC ISSUES</div>
+            <ul class="nav-links">
+                <li><a href="/">File Complaint</a></li>
+                <li><a href="/track" class="active">Track</a></li>
+                <li><a href="/admin">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1 class="main-heading">Check complaint status.</h1>
+        </div>
+
+        <div class="search-section">
+            <form action="/track" method="post" style="display: flex; gap: 1rem; width: 100%;">
+                <input type="number" name="complaint_id" placeholder="Enter complaint ID" class="search-input" required>
+                <button type="submit" class="search-btn">TRACK</button>
+            </form>
+        </div>
+
+        {% if complaint %}
+        <div class="results-section">
+            <!-- Left Side - Details Card -->
+            <div class="details-card">
+                <div class="card-title">/ COMPLAINT DETAILS</div>
+
+                <div class="complaint-id">#{{ complaint.id }}</div>
+
+                <div class="badges-section">
+                    <span class="badge category {{ complaint.category }}">{{ complaint.category }}</span>
+                    <span class="badge urgency {{ complaint.urgency }}">{{ complaint.urgency }}</span>
+                    <span class="badge status {{ complaint.status }}">{{ complaint.status }}</span>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field-item">
+                        <div class="field-label">Department</div>
+                        <div class="field-value">{{ complaint.department }}</div>
+                    </div>
+                    <div class="field-item">
+                        <div class="field-label">Filed Time</div>
+                        <div class="field-value">{{ complaint.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                    <div class="field-item">
+                        <div class="field-label">Last Updated</div>
+                        <div class="field-value">{{ complaint.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                    <div class="field-item">
+                        <div class="field-label">Location</div>
+                        <div class="field-value">{% if 'Location:' in complaint.text %}{{ complaint.text.split('Location:')[1].split('\n')[0] }}{% else %}Not specified{% endif %}</div>
+                    </div>
+                </div>
+
+                <div class="description-section">
+                    <div class="field-label" style="margin-bottom: 1rem;">Description</div>
+                    <div class="description-text">
+                        {% if 'Location:' in complaint.text %}
+                            {{ complaint.text.split('Location:')[1].split('\n\n', 1)[1] if '\n\n' in complaint.text.split('Location:')[1] else complaint.text.split('Location:')[1].split('\n', 1)[1] if '\n' in complaint.text.split('Location:')[1] else 'No description available' }}
+                        {% elif 'Contact:' in complaint.text %}
+                            {{ complaint.text.split('Contact:')[1].split('\n\n', 1)[1] if '\n\n' in complaint.text.split('Contact:')[1] else complaint.text.split('Contact:')[1].split('\n', 1)[1] if '\n' in complaint.text.split('Contact:')[1] else 'No description available' }}
+                        {% else %}
+                            {{ complaint.text }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="entities-section">
+                    <div class="field-label" style="margin-bottom: 1rem;">AI Entities</div>
+                    <div class="entities-container">
+                        {% for entity in entities %}
+                        <span class="entity-tag">{{ entity }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if complaint.image_path %}
+                <div class="image-section">
+                    <div class="field-label" style="margin-bottom: 1rem;">Attachment</div>
+                    <div class="image-container">
+                        <img src="/static/{{ complaint.image_path }}" alt="Complaint attachment" class="complaint-image">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Side - Timeline Card -->
+            <div class="timeline-card">
+                <div class="card-title">/ TIMELINE</div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Complaint received</div>
+                            <div class="timeline-time">{{ complaint.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: #64748b;"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Pending</div>
+                            <div class="timeline-time">Awaiting department review</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif error %}
+        <div class="results-section">
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <div class="no-results-title">Complaint Not Found</div>
+                <div class="no-results-text">{{ error }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

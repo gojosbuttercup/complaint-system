@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Submitted - Civic Issues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding-top: 120px;
+        }
+        .navbar {
+            background: #1e293b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .navbar .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .navbar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .success-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 4rem 3rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+        .main-heading {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+        .subtext {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 3rem;
+            line-height: 1.5;
+        }
+        .id-container {
+            background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+            border: 2px solid #2563eb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .complaint-id {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+        .copy-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .copy-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .details-section {
+            margin-bottom: 3rem;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .detail-item {
+            text-align: center;
+        }
+        .detail-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        .badge.category.water {
+            background-color: #007bff;
+        }
+        .badge.category.electricity {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge.category.internet {
+            background-color: #28a745;
+        }
+        .badge.category.other {
+            background-color: #6c757d;
+        }
+        .badge.urgency.high {
+            background-color: #dc3545;
+        }
+        .badge.urgency.medium {
+            background-color: #fd7e14;
+        }
+        .badge.urgency.low {
+            background-color: #28a745;
+        }
+        .badge.status.pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge.status.resolved {
+            background-color: #28a745;
+        }
+        .badge.status.in-progress {
+            background-color: #007bff;
+        }
+        .entities-section {
+            margin-bottom: 3rem;
+        }
+        .entities-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+        }
+        .entities-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .entity-tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-block;
+            text-align: center;
+            min-width: 200px;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: 2px solid #2563eb;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+            .success-card {
+                padding: 3rem 2rem;
+            }
+            .main-heading {
+                font-size: 2.5rem;
+            }
+            .id-container {
+                padding: 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .complaint-id {
+                font-size: 2rem;
+            }
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">CIVIC ISSUES</div>
+            <ul class="nav-links">
+                <li><a href="/">File Complaint</a></li>
+                <li><a href="/track" class="active">Track</a></li>
+                <li><a href="/admin">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="success-card">
+            <div class="success-icon">✅</div>
+            <h1 class="main-heading">Complaint received.</h1>
+            <p class="subtext">Save this ID. You can track progress anytime.</p>
+
+            <div class="id-container">
+                <span class="complaint-id">#{{ complaint.id }}</span>
+                <button class="copy-btn" onclick="copyToClipboard('#{{ complaint.id }}')">COPY</button>
+            </div>
+
+            <div class="details-section">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Category</div>
+                        <span class="badge category {{ complaint.category }}">{{ complaint.category }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Urgency</div>
+                        <span class="badge urgency {{ complaint.urgency }}">{{ complaint.urgency }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Department</div>
+                        <div style="font-weight: 600; color: #0f172a; font-size: 1.1rem;">{{ complaint.department }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <span class="badge status {{ complaint.status }}">{{ complaint.status }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="entities-section">
+                <div class="entities-title">AI-Extracted Entities</div>
+                <div class="entities-container">
+                    {% for entity in entities %}
+                    <span class="entity-tag">{{ entity }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/track?id={{ complaint.id }}" class="btn btn-primary">TRACK THIS COMPLAINT →</a>
+                <a href="/" class="btn btn-secondary">FILE ANOTHER</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show temporary feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'COPIED!';
+                btn.style.background = '#059669';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#2563eb';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

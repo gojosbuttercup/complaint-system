@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Complaint - Civic Issues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding-top: 120px;
+        }
+        .navbar {
+            background: #1e293b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .navbar .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .navbar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        /* Ticker Bar */
+        .ticker-bar {
+            background: #0f172a;
+            color: #64748b;
+            padding: 0.75rem;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            width: 100%;
+            z-index: 999;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1.2px;
+        }
+        .ticker-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 20s linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes scroll-left {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-100%, 0);
+            }
+        }
+        .ticker-content span {
+            margin: 0 2rem;
+            color: #94a3b8;
+        }
+        .ticker-content span.live {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        /* Left Section */
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .main-heading {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+        }
+        .main-heading .highlight {
+            color: #2563eb;
+        }
+        .description {
+            font-size: 1.1rem;
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .image-container {
+            background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        /* Right Section - Form */
+        .right-section {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .form-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #cbd5e1;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .file-input {
+            padding: 0.5rem;
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        .file-input:hover {
+            border-color: #2563eb;
+            background: #f0f4ff;
+        }
+        .file-input:focus {
+            border-color: #2563eb;
+            background: #f0f4ff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .helper-text {
+            font-size: 0.85rem;
+            color: #71717a;
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            margin-top: 1.5rem;
+        }
+        .submit-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        .message {
+            padding: 1rem;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .main-heading {
+                font-size: 2.5rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .main-container {
+                padding: 2rem 1rem;
+                gap: 2rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .main-heading {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">CIVIC ISSUES</div>
+            <ul class="nav-links">
+                <li><a href="/" class="{% if active_page == 'home' %}active{% endif %}">Home</a></li>
+                <li><a href="/track" class="{% if active_page == 'track' %}active{% endif %}">Track</a></li>
+                <li><a href="/admin" class="{% if active_page == 'admin' %}active{% endif %}">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="ticker-bar">
+        <div class="ticker-content">
+            <span class="live">● LIVE</span>
+            <span>AI CLASSIFIER ACTIVE</span>
+            <span>AVG RESPONSE TIME 2.4S</span>
+            <span>DEPARTMENTS SYNCED</span>
+            <span>AI TRIAGE ONLINE</span>
+            <span class="live">● LIVE</span>
+            <span>AI CLASSIFIER ACTIVE</span>
+            <span>AVG RESPONSE TIME 2.4S</span>
+            <span>DEPARTMENTS SYNCED</span>
+            <span>AI TRIAGE ONLINE</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Section -->
+        <div class="left-section">
+            <div>
+                <div class="section-label">/ FILE GRIEVANCE</div>
+                <h1 class="main-heading">Civic issues, <span class="highlight">routed by AI</span> in seconds.</h1>
+            </div>
+            <p class="description">
+                Report road damage, water issues, electricity faults, and other civic problems. Our AI system instantly classifies your complaint, assigns it to the right department, and prioritizes urgent cases.
+            </p>
+            <div class="image-container">
+                <img src="https://images.unsplash.com/photo-1486299267070-83823f5448dd" alt="City road infrastructure" style="width: 100%; border-radius: 12px; margin-top: 20px;">
+            </div>
+        </div>
+
+        <!-- Right Section - Form -->
+        <div class="right-section">
+            <div class="form-card">
+                <div class="form-title">/ SUBMISSION FORM</div>
+
+                {% if message %}
+                <div class="message">✓ {{ message }}</div>
+                {% endif %}
+
+                <form action="/submit" method="post" enctype="multipart/form-data">
+                    <!-- Row 1: Name and Contact -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">Contact (Email / Phone)</label>
+                            <input type="text" id="contact" name="contact" placeholder="email@example.com" required>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Location -->
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="Street, area, or landmark" required>
+                    </div>
+
+                    <!-- Row 3: Description -->
+                    <div class="form-group">
+                        <label for="text">Describe the Issue</label>
+                        <textarea id="text" name="text" placeholder="Provide details about the problem..." required></textarea>
+                        <p class="helper-text">💡 Be specific. Mention duration, affected area, and any safety hazard.</p>
+                    </div>
+
+                    <!-- Row 4: Image Upload -->
+                    <div class="form-group">
+                        <label for="image">Upload Image (optional)</label>
+                        <input type="file" id="image" name="image" accept="image/*" class="file-input">
+                        <p class="helper-text">📷 Add a photo to help illustrate the issue (JPG, PNG, GIF, WebP)</p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn">FILE COMPLAINT →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

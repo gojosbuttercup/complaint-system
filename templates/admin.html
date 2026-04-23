@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIVITAS / CONTROL - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+            padding-top: 80px;
+        }
+        .navbar {
+            background: #1e293b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .navbar .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .navbar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+        .header-left .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .stat-card.total::after { background: #2563eb; }
+        .stat-card.pending::after { background: #f59e0b; }
+        .stat-card.in-progress::after { background: #14b8a6; }
+        .stat-card.resolved::after { background: #10b981; }
+        .stat-card.rejected::after { background: #6b7280; }
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1;
+        }
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .trend-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .trend-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        .trend-container {
+            position: relative;
+            height: 200px;
+        }
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+        .filters-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .filters-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .filter-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1rem;
+        }
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr:hover {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+        .id-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .id-link:hover {
+            text-decoration: underline;
+        }
+        .attachment-link {
+            color: #059669;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+        .no-attachment {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+        .badge.category.water { background-color: #007bff; }
+        .badge.category.electricity { background-color: #ffc107; color: #212529; }
+        .badge.category.internet { background-color: #28a745; }
+        .badge.category.other { background-color: #6c757d; }
+        .badge.urgency.high { background-color: #dc3545; }
+        .badge.urgency.medium { background-color: #fd7e14; }
+        .badge.urgency.low { background-color: #28a745; }
+        .badge.status.pending { background-color: #ffc107; color: #212529; }
+        .badge.status.resolved { background-color: #28a745; }
+        .badge.status.in-progress { background-color: #007bff; }
+        .badge.status.rejected { background-color: #6b7280; }
+        .actions-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .actions-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .actions-dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 120px;
+        }
+        .actions-dropdown:hover .actions-dropdown-content {
+            display: block;
+        }
+        .actions-dropdown-content a {
+            display: block;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #475569;
+            font-size: 0.8rem;
+        }
+        .actions-dropdown-content a:hover {
+            background: #f8fafc;
+        }
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .no-data {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+        .no-data-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .no-data-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Side Drawer Styles */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 450px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 2001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        .drawer.active {
+            transform: translateX(0);
+        }
+        .drawer-header {
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .drawer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        .drawer-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .drawer-content {
+            padding: 2rem;
+        }
+        .drawer-section {
+            margin-bottom: 2rem;
+        }
+        .drawer-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        .drawer-field {
+            margin-bottom: 1.5rem;
+        }
+        .drawer-field-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .drawer-field-value {
+            font-size: 1rem;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+        .drawer-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .entity-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .entity-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .drawer-status-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .drawer-status-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .drawer-status-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+        .drawer-status-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        .drawer-status-btn.pending {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        .drawer-status-btn.pending.active {
+            background: #ffc107;
+            color: white;
+        }
+        .drawer-status-btn.in-progress {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .drawer-status-btn.in-progress.active {
+            background: #007bff;
+            color: white;
+        }
+        .drawer-status-btn.resolved {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        .drawer-status-btn.resolved.active {
+            background: #28a745;
+            color: white;
+        }
+        .drawer-status-btn.rejected {
+            border-color: #6b7280;
+            color: #6b7280;
+        }
+        .drawer-status-btn.rejected.active {
+            background: #6b7280;
+            color: white;
+        }
+        .drawer-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline-item {
+            position: relative;
+            padding: 1rem 0;
+            border-left: 2px solid #e2e8f0;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 1.5rem;
+            width: 10px;
+            height: 10px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+        .timeline-item.current::before {
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        .timeline-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+        .timeline-time {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .drawer-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .drawer-close:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        @media (max-width: 768px) {
+            .drawer {
+                width: 100%;
+            }
+        }
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .search-container {
+                max-width: none;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .header-section {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .stats-section {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            .table-section {
+                overflow-x: auto;
+            }
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;">
+        Welcome back, Admin! Dashboard updated.
+    </div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">CIVIC ISSUES</div>
+            <ul class="nav-links">
+                <li><a href="/">File Complaint</a></li>
+                <li><a href="/track">Track</a></li>
+                <li><a href="/admin" class="active">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="header-left">
+                <h1>CIVITAS / CONTROL</h1>
+                <div class="subtitle">ADMIN DASHBOARD</div>
+            </div>
+            <div class="header-right">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+                <button class="btn btn-secondary" onclick="location.reload()">REFRESH</button>
+                <a href="/admin/logout" class="btn btn-danger" style="text-decoration: none;">LOGOUT</a>
+            </div>
+        </div>
+
+        {% if complaints %}
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stat-card total">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Total</div>
+                <div class="stat-number">{{ complaints|length }}</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-number">{{ status_counts.get('pending', 0) }}</div>
+            </div>
+            <div class="stat-card in-progress">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-label">In Progress</div>
+                <div class="stat-number">{{ status_counts.get('in-progress', 0) }}</div>
+            </div>
+            <div class="stat-card resolved">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Resolved</div>
+                <div class="stat-number">{{ status_counts.get('resolved', 0) }}</div>
+            </div>
+            <div class="stat-card rejected">
+                <div class="stat-icon">❌</div>
+                <div class="stat-label">Rejected</div>
+                <div class="stat-number">{{ status_counts.get('rejected', 0) }}</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">COMPLAINTS BY CATEGORY</div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">URGENCY DISTRIBUTION</div>
+                <div class="chart-container">
+                    <canvas id="urgencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trend Section -->
+        <div class="trend-section">
+            <div class="trend-title">LAST 14 DAYS - INTAKE TREND</div>
+            <div class="trend-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filters-left">
+                <div class="filters-label">FILTERS</div>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="water">Water</option>
+                    <option value="electricity">Electricity</option>
+                    <option value="internet">Internet</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="urgencyFilter" class="filter-select">
+                    <option value="">All Urgencies</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="search-container">
+                <div class="search-icon">🔍</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search ID, name, description...">
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <table id="complaintsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NAME</th>
+                        <th>CATEGORY</th>
+                        <th>URGENCY</th>
+                        <th>DEPARTMENT</th>
+                        <th>STATUS</th>
+                        <th>ATTACHMENT</th>
+                        <th>FILED</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for complaint in complaints %}
+                    <tr data-id="{{ complaint.id }}" data-category="{{ complaint.category }}" data-urgency="{{ complaint.urgency }}" data-status="{{ complaint.status }}" data-complaint='{{ {"id": complaint.id, "name": complaint.name, "category": complaint.category, "urgency": complaint.urgency, "status": complaint.status, "department": complaint.department, "filedDate": complaint.timestamp.strftime("%B %d, %Y at %I:%M %p"), "description": complaint.text, "imagePath": complaint.image_path or "", "entities": complaint_entities.get(complaint.id, [])} | tojson }}' onclick="openDrawer(this.dataset.complaint)">
+                        <td><span class="id-link">#{{ complaint.id }}</span></td>
+                        <td>{{ complaint.name }}</td>
+                        <td><span class="badge category {{ complaint.category }}">{{ complaint.category }}</span></td>
+                        <td><span class="badge urgency {{ complaint.urgency }}">{{ complaint.urgency }}</span></td>
+                        <td>{{ complaint.department }}</td>
+                        <td><span class="badge status {{ complaint.status }}">{{ complaint.status }}</span></td>
+                        <td>
+                            {% if complaint.image_path %}
+                                <a href="/static/{{ complaint.image_path }}" target="_blank" class="attachment-link" onclick="event.stopPropagation()">📎 View</a>
+                            {% else %}
+                                <span class="no-attachment">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ complaint.timestamp.strftime('%m/%d/%y') }}</td>
+                        <td>
+                            <div class="actions-dropdown">
+                                <button class="actions-btn" onclick="event.stopPropagation()">Actions ▼</button>
+                                <div class="actions-dropdown-content">
+                                    <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('pending', {{ complaint.id }})">Mark Pending</a>
+                                    <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('in_progress', {{ complaint.id }})">Mark In Progress</a>
+                                    <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('resolved', {{ complaint.id }})">Mark Resolved</a>
+                                    <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('rejected', {{ complaint.id }})">Mark Rejected</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <div class="no-data-icon">📊</div>
+            <div class="no-data-title">No Complaints Yet</div>
+            <div>The dashboard will show data once complaints are filed.</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Side Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="complaintDrawer">
+        <button class="drawer-close" onclick="closeDrawer()">×</button>
+        <div class="drawer-header">
+            <div class="drawer-title" id="drawerComplaintId">Complaint #123</div>
+            <div class="drawer-badges" id="drawerBadges">
+                <!-- Badges will be populated by JavaScript -->
+            </div>
+        </div>
+        <div class="drawer-content">
+            <div class="drawer-section">
+                <div class="drawer-section-title">Details</div>
+                <div class="drawer-field">
+                    <div class="drawer-field-label">Name</div>
+                    <div class="drawer-field-value" id="drawerName">John Doe</div>
+                </div>
+                <div class="drawer-field">
+                    <div class="drawer-field-label">Contact</div>
+                    <div class="drawer-field-value" id="drawerContact">john@example.com</div>
+                </div>
+                <div class="drawer-field">
+                    <div class="drawer-field-label">Location</div>
+                    <div class="drawer-field-value" id="drawerLocation">123 Main St</div>
+                </div>
+                <div class="drawer-field">
+                    <div class="drawer-field-label">Department</div>
+                    <div class="drawer-field-value" id="drawerDepartment">General Department</div>
+                </div>
+                <div class="drawer-field">
+                    <div class="drawer-field-label">Filed Date</div>
+                    <div class="drawer-field-value" id="drawerFiledDate">Jan 15, 2024 at 2:30 PM</div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-title">Description</div>
+                <div class="drawer-field-value" id="drawerDescription">Complaint description here...</div>
+            </div>
+
+            <div class="drawer-section" id="drawerEntitiesSection" style="display: none;">
+                <div class="drawer-section-title">AI Entities</div>
+                <div class="entity-tags" id="drawerEntities"></div>
+            </div>
+
+            <div class="drawer-section" id="drawerImageSection" style="display: none;">
+                <div class="drawer-section-title">Attachment</div>
+                <img id="drawerImage" class="drawer-image" src="" alt="Complaint attachment">
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-title">Update Status</div>
+                <div class="drawer-status-buttons">
+                    <button class="drawer-status-btn pending" onclick="updateStatusFromDrawer('pending')">Pending</button>
+                    <button class="drawer-status-btn in-progress" onclick="updateStatusFromDrawer('in_progress')">In Progress</button>
+                    <button class="drawer-status-btn resolved" onclick="updateStatusFromDrawer('resolved')">Resolved</button>
+                    <button class="drawer-status-btn rejected" onclick="updateStatusFromDrawer('rejected')">Rejected</button>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-title">Timeline</div>
+                <div class="drawer-timeline">
+                    <div class="timeline-item current">
+                        <div class="timeline-title">Complaint received</div>
+                        <div class="timeline-time" id="drawerTimelineTime">Jan 15, 2024 at 2:30 PM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show toast notification
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        });
+
+        // Initialize charts
+        {% if categories %}
+        // Category Bar Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ categories|tojson }},
+                datasets: [{
+                    label: 'Complaints',
+                    data: {{ counts|tojson }},
+                    backgroundColor: ['#007bff', '#ffc107', '#28a745', '#6c757d'],
+                    borderColor: ['#0056b3', '#e0a800', '#1e7e34', '#5a6268'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Urgency Pie Chart
+        const urgencyCtx = document.getElementById('urgencyChart').getContext('2d');
+        const urgencyChart = new Chart(urgencyCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ urgencies|tojson }},
+                datasets: [{
+                    data: {{ urgency_values|tojson }},
+                    backgroundColor: ['#dc3545', '#fd7e14', '#28a745'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    }
+                }
+            }
+        });
+
+        // Trend Line Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ daily_labels|tojson }},
+                datasets: [{
+                    label: 'Daily Intake',
+                    data: {{ daily_counts|tojson }},
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        // Filter functionality
+        function filterTable() {
+            const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+            const urgencyFilter = document.getElementById('urgencyFilter').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#complaintsTable tbody tr');
+
+            rows.forEach(row => {
+                const category = row.dataset.category.toLowerCase();
+                const urgency = row.dataset.urgency.toLowerCase();
+                const status = row.dataset.status.toLowerCase();
+                const text = row.textContent.toLowerCase();
+
+                const categoryMatch = !categoryFilter || category === categoryFilter;
+                const urgencyMatch = !urgencyFilter || urgency === urgencyFilter;
+                const statusMatch = !statusFilter || status === statusFilter;
+                const searchMatch = !searchTerm || text.includes(searchTerm);
+
+                if (categoryMatch && urgencyMatch && statusMatch && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Add event listeners for filters
+        document.getElementById('categoryFilter').addEventListener('change', filterTable);
+        document.getElementById('urgencyFilter').addEventListener('change', filterTable);
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('searchInput').addEventListener('input', filterTable);
+
+        // Status change function
+        function changeStatus(complaintId, newStatus) {
+            console.log('changeStatus called with:', complaintId, newStatus);
+            alert(`Updating complaint ${complaintId} to ${newStatus}`); // Temporary debug alert
+
+            // Send PUT request to update status
+            const url = `/complaints/${complaintId}/status?status=${newStatus}`;
+            console.log('Making request to:', url);
+
+            fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success data:', data);
+                // Show success message
+                showToast('Status updated successfully!', 'success');
+
+                // Refresh the page to show updated data
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                showToast('Failed to update status. Please try again.', 'error');
+            });
+        }
+
+        // Drawer functions
+        let currentComplaintId = null;
+
+        function openDrawer(complaintJson) {
+            const complaint = JSON.parse(complaintJson);
+            currentComplaintId = complaint.id;
+
+            document.getElementById('drawerComplaintId').textContent = `Complaint #${complaint.id}`;
+            document.getElementById('drawerName').textContent = complaint.name;
+            document.getElementById('drawerDepartment').textContent = complaint.department;
+            document.getElementById('drawerFiledDate').textContent = complaint.filedDate;
+            document.getElementById('drawerTimelineTime').textContent = complaint.filedDate;
+
+            const lines = complaint.description.split('\n');
+            let contact = 'Not provided';
+            let location = 'Not provided';
+            let cleanDescription = complaint.description;
+
+            lines.forEach(line => {
+                if (line.startsWith('Contact:')) {
+                    contact = line.replace('Contact:', '').trim();
+                    cleanDescription = cleanDescription.replace(line + '\n', '');
+                } else if (line.startsWith('Location:')) {
+                    location = line.replace('Location:', '').trim();
+                    cleanDescription = cleanDescription.replace(line + '\n', '');
+                }
+            });
+
+            document.getElementById('drawerContact').textContent = contact;
+            document.getElementById('drawerLocation').textContent = location;
+            document.getElementById('drawerDescription').textContent = cleanDescription.trim();
+
+            const entitySection = document.getElementById('drawerEntitiesSection');
+            const entityContainer = document.getElementById('drawerEntities');
+            entityContainer.innerHTML = '';
+            if (Array.isArray(complaint.entities) && complaint.entities.length) {
+                complaint.entities.forEach(entity => {
+                    const tag = document.createElement('span');
+                    tag.className = 'entity-tag';
+                    tag.textContent = entity;
+                    entityContainer.appendChild(tag);
+                });
+                entitySection.style.display = 'block';
+            } else {
+                entitySection.style.display = 'none';
+            }
+
+            const badgesContainer = document.getElementById('drawerBadges');
+            badgesContainer.innerHTML = `
+                <span class="badge category ${complaint.category}">${complaint.category}</span>
+                <span class="badge urgency ${complaint.urgency}">${complaint.urgency}</span>
+                <span class="badge status ${complaint.status}">${complaint.status}</span>
+            `;
+
+            const imageSection = document.getElementById('drawerImageSection');
+            const imageElement = document.getElementById('drawerImage');
+            if (complaint.imagePath && complaint.imagePath.trim()) {
+                imageElement.src = complaint.imagePath.startsWith('/static/') ? complaint.imagePath : `/static/${complaint.imagePath}`;
+                imageSection.style.display = 'block';
+            } else {
+                imageSection.style.display = 'none';
+            }
+
+            updateStatusButtons(complaint.status);
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('complaintDrawer').classList.add('active');
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('complaintDrawer').classList.remove('active');
+            currentComplaintId = null;
+        }
+
+        function updateStatusButtons(currentStatus) {
+            const buttons = document.querySelectorAll('.drawer-status-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.classList.contains(currentStatus.replace('_', '-'))) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function updateStatusFromDrawer(newStatus, complaintId = null) {
+            const id = complaintId || currentComplaintId;
+            if (!id) return;
+            
+            // Send PUT request to update status
+            const url = `/complaints/${id}/status?status=${newStatus}`;
+            
+            fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update UI
+                updateStatusButtons(newStatus);
+                
+                // Update the table row status
+                const row = document.querySelector(`tr[data-id="${id}"]`);
+                if (row) {
+                    row.dataset.status = newStatus;
+                    const statusBadge = row.querySelector('.badge.status');
+                    if (statusBadge) {
+                        statusBadge.className = `badge status ${newStatus}`;
+                        statusBadge.textContent = newStatus;
+                    }
+                }
+                
+                // Update drawer badges
+                const badgesContainer = document.getElementById('drawerBadges');
+                const statusBadge = badgesContainer.querySelector('.badge.status');
+                if (statusBadge) {
+                    statusBadge.className = `badge status ${newStatus}`;
+                    statusBadge.textContent = newStatus;
+                }
+                
+                showToast('Status updated successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                showToast('Failed to update status. Please try again.', 'error');
+            });
+        }
+
+        // Toast notification function
+        function showToast(message, type) {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.textContent = message;
+
+            // Add toast styles
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: all 0.3s ease;
+            `;
+
+            if (type === 'success') {
+                toast.style.backgroundColor = '#10b981';
+            } else {
+                toast.style.backgroundColor = '#ef4444';
+            }
+
+            // Add to page
+            document.body.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
