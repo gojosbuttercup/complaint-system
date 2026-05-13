@@ -187,6 +187,9 @@
         .badge.status.in-progress {
             background-color: #007bff;
         }
+        .badge.status.in_progress {
+            background-color: #007bff;
+        }
         .field-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -343,6 +346,12 @@
             object-fit: contain;
             display: block;
         }
+        .refresh-indicator {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -364,13 +373,13 @@
 
         <div class="search-section">
             <form action="/track" method="post" style="display: flex; gap: 1rem; width: 100%;">
-                <input type="number" name="complaint_id" placeholder="Enter complaint ID" class="search-input" required>
+                <input type="number" name="complaint_id" placeholder="Enter complaint ID" class="search-input" id="complaintIdInput" required>
                 <button type="submit" class="search-btn">TRACK</button>
             </form>
         </div>
 
         {% if complaint %}
-        <div class="results-section">
+        <div class="results-section" id="resultsSection">
             <!-- Left Side - Details Card -->
             <div class="details-card">
                 <div class="card-title">/ COMPLAINT DETAILS</div>
@@ -380,7 +389,7 @@
                 <div class="badges-section">
                     <span class="badge category {{ complaint.category }}">{{ complaint.category }}</span>
                     <span class="badge urgency {{ complaint.urgency }}">{{ complaint.urgency }}</span>
-                    <span class="badge status {{ complaint.status }}">{{ complaint.status }}</span>
+                    <span class="badge status {{ complaint.status }}" id="statusBadge">{{ complaint.status }}</span>
                 </div>
 
                 <div class="field-grid">
@@ -432,13 +441,17 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <div class="refresh-indicator">
+                    Status updates automatically every 5 seconds
+                </div>
             </div>
 
             <!-- Right Side - Timeline Card -->
             <div class="timeline-card">
                 <div class="card-title">/ TIMELINE</div>
 
-                <div class="timeline">
+                <div class="timeline" id="timelineContainer">
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
@@ -447,16 +460,91 @@
                         </div>
                     </div>
 
-                    <div class="timeline-item">
+                    <div class="timeline-item" id="statusTimelineItem">
                         <div class="timeline-dot" style="background: #64748b;"></div>
                         <div class="timeline-content">
-                            <div class="timeline-title">Pending</div>
-                            <div class="timeline-time">Awaiting department review</div>
+                            <div class="timeline-title" id="statusTimelineTitle">Pending</div>
+                            <div class="timeline-time" id="statusTimelineTime">Awaiting department review</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            // Status to description mapping
+            const statusDescriptions = {
+                'pending': 'Awaiting department review',
+                'in_progress': 'Currently being investigated',
+                'in-progress': 'Currently being investigated',
+                'resolved': 'Issue has been resolved',
+                'rejected': 'Complaint rejected'
+            };
+
+            const statusColors = {
+                'pending': '#ffc107',
+                'in_progress': '#007bff',
+                'in-progress': '#007bff',
+                'resolved': '#28a745',
+                'rejected': '#dc3545'
+            };
+
+            function updateTimeline(status) {
+                const title = document.getElementById('statusTimelineTitle');
+                const timeText = document.getElementById('statusTimelineTime');
+                const dot = document.getElementById('statusTimelineItem').querySelector('.timeline-dot');
+
+                if (title) {
+                    title.textContent = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
+                }
+                if (timeText) {
+                    timeText.textContent = statusDescriptions[status] || 'Status updated';
+                }
+                if (dot) {
+                    dot.style.background = statusColors[status] || '#64748b';
+                }
+            }
+
+            // Initialize timeline with current status
+            updateTimeline('{{ complaint.status }}');
+
+            // Auto-refresh complaint status every 5 seconds
+            const complaintId = {{ complaint.id }};
+            let refreshInterval;
+
+            function refreshComplaintStatus() {
+                fetch(`/complaints/${complaintId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusBadge = document.getElementById('statusBadge');
+                        const currentStatus = statusBadge ? statusBadge.textContent.trim() : null;
+
+                        if (currentStatus && data.status !== currentStatus) {
+                            // Status changed, update the badge
+                            statusBadge.textContent = data.status;
+                            statusBadge.className = `badge status ${data.status}`;
+
+                            // Update timeline
+                            updateTimeline(data.status);
+                        }
+                    })
+                    .catch(error => console.log('Status refresh error:', error));
+            }
+
+            // Start auto-refresh when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    refreshInterval = setInterval(refreshComplaintStatus, 5000);
+                });
+            } else {
+                refreshInterval = setInterval(refreshComplaintStatus, 5000);
+            }
+
+            // Stop refresh when page unloads
+            window.addEventListener('beforeunload', function() {
+                if (refreshInterval) clearInterval(refreshInterval);
+            });
+        </script>
         {% elif error %}
         <div class="results-section">
             <div class="no-results">

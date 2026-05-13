@@ -165,6 +165,7 @@
         .stat-card.in-progress::after { background: #14b8a6; }
         .stat-card.resolved::after { background: #10b981; }
         .stat-card.rejected::after { background: #6b7280; }
+        .stat-card.average::after { background: #7c3aed; }
         .stat-icon {
             font-size: 2rem;
             margin-bottom: 1rem;
@@ -222,6 +223,12 @@
         .trend-container {
             position: relative;
             height: 200px;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
         .filters-section {
             background: white;
@@ -337,6 +344,10 @@
         .badge.category.water { background-color: #007bff; }
         .badge.category.electricity { background-color: #ffc107; color: #212529; }
         .badge.category.internet { background-color: #28a745; }
+        .badge.category.roads { background-color: #7c3aed; }
+        .badge.category.sanitation { background-color: #0891b2; }
+        .badge.category.public_safety { background-color: #dc2626; }
+        .badge.category.waste_management { background-color: #16a34a; }
         .badge.category.other { background-color: #6c757d; }
         .badge.urgency.high { background-color: #dc3545; }
         .badge.urgency.medium { background-color: #fd7e14; }
@@ -344,7 +355,48 @@
         .badge.status.pending { background-color: #ffc107; color: #212529; }
         .badge.status.resolved { background-color: #28a745; }
         .badge.status.in-progress { background-color: #007bff; }
+        .badge.status.in_progress { background-color: #007bff; }
         .badge.status.rejected { background-color: #6b7280; }
+        .session-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.65rem 0.9rem;
+            color: #334155;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .department-list {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .department-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .department-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+        .department-name {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .department-count {
+            color: #2563eb;
+            font-weight: 800;
+        }
         .actions-dropdown {
             position: relative;
             display: inline-block;
@@ -627,6 +679,9 @@
                 width: 100%;
             }
         }
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
             .charts-section {
                 grid-template-columns: 1fr;
             }
@@ -683,47 +738,73 @@
         <div class="header-section">
             <div class="header-left">
                 <h1>CIVITAS / CONTROL</h1>
-                <div class="subtitle">ADMIN DASHBOARD</div>
+                <div class="subtitle">
+                    {% if is_super_admin %}
+                        SUPER ADMIN DASHBOARD
+                    {% else %}
+                        {{ current_user.department }} DASHBOARD
+                    {% endif %}
+                </div>
             </div>
             <div class="header-right">
+                <div class="session-card">{{ current_user.username }}</div>
                 <div class="live-indicator">
                     <div class="live-dot"></div>
                     <span>LIVE</span>
                 </div>
                 <button class="btn btn-secondary" onclick="location.reload()">REFRESH</button>
-                <a href="/admin/logout" class="btn btn-danger" style="text-decoration: none;">LOGOUT</a>
+                <button class="btn btn-secondary" onclick="downloadPdfReport()">DOWNLOAD PDF REPORT</button>
+                <a href="/logout" class="btn btn-danger" style="text-decoration: none;">LOGOUT</a>
             </div>
         </div>
 
-        {% if complaints %}
         <!-- Stats Section -->
         <div class="stats-section">
             <div class="stat-card total">
                 <div class="stat-icon">📊</div>
                 <div class="stat-label">Total</div>
-                <div class="stat-number">{{ complaints|length }}</div>
+                <div class="stat-number" id="statTotal">{{ complaints|length }}</div>
             </div>
             <div class="stat-card pending">
                 <div class="stat-icon">⏳</div>
                 <div class="stat-label">Pending</div>
-                <div class="stat-number">{{ status_counts.get('pending', 0) }}</div>
+                <div class="stat-number" id="statPending">{{ status_counts.get('pending', 0) }}</div>
             </div>
             <div class="stat-card in-progress">
                 <div class="stat-icon">⚡</div>
                 <div class="stat-label">In Progress</div>
-                <div class="stat-number">{{ status_counts.get('in-progress', 0) }}</div>
+                <div class="stat-number" id="statInProgress">{{ status_counts.get('in_progress', 0) }}</div>
             </div>
             <div class="stat-card resolved">
                 <div class="stat-icon">✅</div>
                 <div class="stat-label">Resolved</div>
-                <div class="stat-number">{{ status_counts.get('resolved', 0) }}</div>
+                <div class="stat-number" id="statResolved">{{ status_counts.get('resolved', 0) }}</div>
             </div>
             <div class="stat-card rejected">
                 <div class="stat-icon">❌</div>
                 <div class="stat-label">Rejected</div>
-                <div class="stat-number">{{ status_counts.get('rejected', 0) }}</div>
+                <div class="stat-number" id="statRejected">{{ status_counts.get('rejected', 0) }}</div>
+            </div>
+            <div class="stat-card average">
+                <div class="stat-icon">⏱</div>
+                <div class="stat-label">Avg Resolution Hours</div>
+                <div class="stat-number" id="statAvgResolution">{{ avg_resolution_hours }}</div>
             </div>
         </div>
+
+        {% if is_super_admin %}
+        <div class="department-list">
+            <div class="chart-title">DEPARTMENTS</div>
+            <div class="department-grid">
+                {% for department in departments %}
+                <div class="department-item">
+                    <span class="department-name">{{ department }}</span>
+                    <span class="department-count" data-department-count="{{ department }}">{{ department_counts.get(department, 0) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Charts Section -->
         <div class="charts-section">
@@ -749,6 +830,21 @@
             </div>
         </div>
 
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-title">COMPLAINTS PER DEPARTMENT</div>
+                <div class="chart-container">
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">RESOLVED VS OPEN</div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <!-- Filters Section -->
         <div class="filters-section">
             <div class="filters-left">
@@ -758,8 +854,20 @@
                     <option value="water">Water</option>
                     <option value="electricity">Electricity</option>
                     <option value="internet">Internet</option>
+                    <option value="roads">Roads</option>
+                    <option value="sanitation">Sanitation</option>
+                    <option value="public_safety">Public Safety</option>
+                    <option value="waste_management">Waste Management</option>
                     <option value="other">Other</option>
                 </select>
+                {% if is_super_admin %}
+                <select id="departmentFilter" class="filter-select">
+                    <option value="">All Departments</option>
+                    {% for department in departments %}
+                    <option value="{{ department }}">{{ department }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <select id="urgencyFilter" class="filter-select">
                     <option value="">All Urgencies</option>
                     <option value="high">High</option>
@@ -769,7 +877,7 @@
                 <select id="statusFilter" class="filter-select">
                     <option value="">All Statuses</option>
                     <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
+                    <option value="in_progress">In Progress</option>
                     <option value="resolved">Resolved</option>
                     <option value="rejected">Rejected</option>
                 </select>
@@ -798,7 +906,7 @@
                 </thead>
                 <tbody>
                     {% for complaint in complaints %}
-                    <tr data-id="{{ complaint.id }}" data-category="{{ complaint.category }}" data-urgency="{{ complaint.urgency }}" data-status="{{ complaint.status }}" data-complaint='{{ {"id": complaint.id, "name": complaint.name, "category": complaint.category, "urgency": complaint.urgency, "status": complaint.status, "department": complaint.department, "filedDate": complaint.timestamp.strftime("%B %d, %Y at %I:%M %p"), "description": complaint.text, "imagePath": complaint.image_path or "", "entities": complaint_entities.get(complaint.id, [])} | tojson }}' onclick="openDrawer(this.dataset.complaint)">
+                    <tr data-id="{{ complaint.id }}" data-category="{{ complaint.category }}" data-urgency="{{ complaint.urgency }}" data-status="{{ complaint.status }}" data-department="{{ complaint.department }}" data-complaint='{{ {"id": complaint.id, "name": complaint.name, "email": complaint.email or "", "category": complaint.category, "urgency": complaint.urgency, "status": complaint.status, "department": complaint.department, "filedDate": complaint.timestamp.strftime("%B %d, %Y at %I:%M %p"), "filedShort": complaint.timestamp.strftime("%m/%d/%y"), "description": complaint.text, "imagePath": complaint.image_path or "", "entities": complaint_entities.get(complaint.id, [])} | tojson }}' onclick="openDrawer(this.dataset.complaint)">
                         <td><span class="id-link">#{{ complaint.id }}</span></td>
                         <td>{{ complaint.name }}</td>
                         <td><span class="badge category {{ complaint.category }}">{{ complaint.category }}</span></td>
@@ -829,13 +937,11 @@
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="no-data">
+        <div class="no-data" id="noDataPanel" style="{% if complaints %}display: none;{% endif %}">
             <div class="no-data-icon">📊</div>
             <div class="no-data-title">No Complaints Yet</div>
             <div>The dashboard will show data once complaints are filed.</div>
         </div>
-        {% endif %}
     </div>
 
     <!-- Side Drawer -->
@@ -921,18 +1027,18 @@
         });
 
         // Initialize charts
-        {% if categories %}
+        let categoryChart, urgencyChart, trendChart, departmentChart, statusChart;
         // Category Bar Chart
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(categoryCtx, {
+        categoryChart = new Chart(categoryCtx, {
             type: 'bar',
             data: {
                 labels: {{ categories|tojson }},
                 datasets: [{
                     label: 'Complaints',
                     data: {{ counts|tojson }},
-                    backgroundColor: ['#007bff', '#ffc107', '#28a745', '#6c757d'],
-                    borderColor: ['#0056b3', '#e0a800', '#1e7e34', '#5a6268'],
+                    backgroundColor: ['#007bff', '#ffc107', '#28a745', '#7c3aed', '#0891b2', '#dc2626', '#16a34a', '#6c757d'],
+                    borderColor: ['#0056b3', '#e0a800', '#1e7e34', '#5b21b6', '#0e7490', '#b91c1c', '#15803d', '#5a6268'],
                     borderWidth: 1
                 }]
             },
@@ -953,7 +1059,7 @@
 
         // Urgency Pie Chart
         const urgencyCtx = document.getElementById('urgencyChart').getContext('2d');
-        const urgencyChart = new Chart(urgencyCtx, {
+        urgencyChart = new Chart(urgencyCtx, {
             type: 'pie',
             data: {
                 labels: {{ urgencies|tojson }},
@@ -977,7 +1083,7 @@
 
         // Trend Line Chart
         const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const trendChart = new Chart(trendCtx, {
+        trendChart = new Chart(trendCtx, {
             type: 'line',
             data: {
                 labels: {{ daily_labels|tojson }},
@@ -1004,11 +1110,51 @@
                 }
             }
         });
-        {% endif %}
+
+        const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+        departmentChart = new Chart(departmentCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ department_chart_labels|tojson }},
+                datasets: [{
+                    label: 'Complaints',
+                    data: {{ department_chart_values|tojson }},
+                    backgroundColor: '#2563eb',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Resolved', 'Open'],
+                datasets: [{
+                    data: [{{ resolved_vs_pending.resolved }}, {{ resolved_vs_pending.pending }}],
+                    backgroundColor: ['#10b981', '#f59e0b'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { padding: 20 } } }
+            }
+        });
 
         // Filter functionality
         function filterTable() {
             const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+            const departmentFilterElement = document.getElementById('departmentFilter');
+            const departmentFilter = departmentFilterElement ? departmentFilterElement.value.toLowerCase() : '';
             const urgencyFilter = document.getElementById('urgencyFilter').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1016,16 +1162,18 @@
 
             rows.forEach(row => {
                 const category = row.dataset.category.toLowerCase();
+                const department = row.dataset.department.toLowerCase();
                 const urgency = row.dataset.urgency.toLowerCase();
                 const status = row.dataset.status.toLowerCase();
                 const text = row.textContent.toLowerCase();
 
                 const categoryMatch = !categoryFilter || category === categoryFilter;
+                const departmentMatch = !departmentFilter || department === departmentFilter;
                 const urgencyMatch = !urgencyFilter || urgency === urgencyFilter;
                 const statusMatch = !statusFilter || status === statusFilter;
                 const searchMatch = !searchTerm || text.includes(searchTerm);
 
-                if (categoryMatch && urgencyMatch && statusMatch && searchMatch) {
+                if (categoryMatch && departmentMatch && urgencyMatch && statusMatch && searchMatch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -1034,49 +1182,160 @@
         }
 
         // Add event listeners for filters
-        document.getElementById('categoryFilter').addEventListener('change', filterTable);
-        document.getElementById('urgencyFilter').addEventListener('change', filterTable);
-        document.getElementById('statusFilter').addEventListener('change', filterTable);
-        document.getElementById('searchInput').addEventListener('input', filterTable);
+        const categoryFilterElement = document.getElementById('categoryFilter');
+        if (categoryFilterElement) {
+            categoryFilterElement.addEventListener('change', filterTable);
+        }
+        const departmentFilterElement = document.getElementById('departmentFilter');
+        if (departmentFilterElement) {
+            departmentFilterElement.addEventListener('change', filterTable);
+        }
+        const urgencyFilterElement = document.getElementById('urgencyFilter');
+        if (urgencyFilterElement) {
+            urgencyFilterElement.addEventListener('change', filterTable);
+        }
+        const statusFilterElement = document.getElementById('statusFilter');
+        if (statusFilterElement) {
+            statusFilterElement.addEventListener('change', filterTable);
+        }
+        const searchInputElement = document.getElementById('searchInput');
+        if (searchInputElement) {
+            searchInputElement.addEventListener('input', filterTable);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function attachmentHtml(complaint) {
+            if (!complaint.imagePath) {
+                return '<span class="no-attachment">—</span>';
+            }
+            const path = complaint.imagePath.startsWith('/static/') || complaint.imagePath.startsWith('/uploads/')
+                ? complaint.imagePath
+                : `/static/${complaint.imagePath}`;
+            return `<a href="${escapeHtml(path)}" target="_blank" class="attachment-link" onclick="event.stopPropagation()">View</a>`;
+        }
+
+        function renderComplaintRow(complaint) {
+            const row = document.createElement('tr');
+            row.dataset.id = complaint.id;
+            row.dataset.category = complaint.category;
+            row.dataset.urgency = complaint.urgency;
+            row.dataset.status = complaint.status;
+            row.dataset.department = complaint.department;
+            row.dataset.complaint = JSON.stringify(complaint);
+            row.onclick = function() { openDrawer(this.dataset.complaint); };
+            row.innerHTML = `
+                <td><span class="id-link">#${escapeHtml(complaint.id)}</span></td>
+                <td>${escapeHtml(complaint.name)}</td>
+                <td><span class="badge category ${escapeHtml(complaint.category)}">${escapeHtml(complaint.category)}</span></td>
+                <td><span class="badge urgency ${escapeHtml(complaint.urgency)}">${escapeHtml(complaint.urgency)}</span></td>
+                <td>${escapeHtml(complaint.department)}</td>
+                <td><span class="badge status ${escapeHtml(complaint.status)}">${escapeHtml(complaint.status)}</span></td>
+                <td>${attachmentHtml(complaint)}</td>
+                <td>${escapeHtml(complaint.filedShort)}</td>
+                <td>
+                    <div class="actions-dropdown">
+                        <button class="actions-btn" onclick="event.stopPropagation()">Actions</button>
+                        <div class="actions-dropdown-content">
+                            <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('pending', ${complaint.id})">Mark Pending</a>
+                            <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('in_progress', ${complaint.id})">Mark In Progress</a>
+                            <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('resolved', ${complaint.id})">Mark Resolved</a>
+                            <a href="#" onclick="event.stopPropagation(); updateStatusFromDrawer('rejected', ${complaint.id})">Mark Rejected</a>
+                        </div>
+                    </div>
+                </td>
+            `;
+            return row;
+        }
+
+        function updateDashboardStats(stats) {
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statInProgress').textContent = stats.in_progress;
+            document.getElementById('statResolved').textContent = stats.resolved;
+            document.getElementById('statRejected').textContent = stats.rejected;
+            document.getElementById('statAvgResolution').textContent = stats.avg_resolution_hours;
+        }
+
+        function updateChart(chart, labels, values) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        }
+
+        function updateDashboardFromPayload(payload) {
+            updateDashboardStats(payload.stats);
+            updateChart(categoryChart, payload.charts.categories, payload.charts.category_counts);
+            updateChart(urgencyChart, payload.charts.urgencies, payload.charts.urgency_values);
+            updateChart(trendChart, payload.charts.daily_labels, payload.charts.daily_counts);
+            updateChart(departmentChart, payload.charts.department_labels, payload.charts.department_values);
+            updateChart(statusChart, payload.charts.status_labels, payload.charts.status_values);
+
+            document.querySelectorAll('[data-department-count]').forEach(item => {
+                item.textContent = payload.department_counts[item.dataset.departmentCount] || 0;
+            });
+
+            const tbody = document.querySelector('#complaintsTable tbody');
+            tbody.innerHTML = '';
+            payload.complaints.forEach(complaint => tbody.appendChild(renderComplaintRow(complaint)));
+
+            const noDataPanel = document.getElementById('noDataPanel');
+            if (noDataPanel) {
+                noDataPanel.style.display = payload.complaints.length ? 'none' : 'block';
+            }
+            if (currentComplaintId) {
+                const openComplaint = payload.complaints.find(item => item.id === currentComplaintId);
+                if (openComplaint) {
+                    document.getElementById('drawerDepartment').textContent = openComplaint.department;
+                    const statusBadge = document.querySelector('#drawerBadges .badge.status');
+                    if (statusBadge) {
+                        statusBadge.className = `badge status ${openComplaint.status}`;
+                        statusBadge.textContent = openComplaint.status;
+                    }
+                    updateStatusButtons(openComplaint.status);
+                }
+            }
+            filterTable();
+        }
+
+        function refreshDashboardData() {
+            fetch('/admin/data')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(updateDashboardFromPayload)
+                .catch(error => console.log('Dashboard refresh error:', error));
+        }
+
+        setInterval(refreshDashboardData, 5000);
+
+        function downloadPdfReport() {
+            const params = new URLSearchParams();
+            const category = document.getElementById('categoryFilter')?.value;
+            const department = document.getElementById('departmentFilter')?.value;
+            const urgency = document.getElementById('urgencyFilter')?.value;
+            const status = document.getElementById('statusFilter')?.value;
+            const search = document.getElementById('searchInput')?.value;
+            if (category) params.set('category', category);
+            if (department) params.set('department', department);
+            if (urgency) params.set('urgency', urgency);
+            if (status) params.set('status', status);
+            if (search) params.set('search', search);
+            window.location.href = `/admin/report.pdf?${params.toString()}`;
+        }
 
         // Status change function
         function changeStatus(complaintId, newStatus) {
-            console.log('changeStatus called with:', complaintId, newStatus);
-            alert(`Updating complaint ${complaintId} to ${newStatus}`); // Temporary debug alert
-
-            // Send PUT request to update status
-            const url = `/complaints/${complaintId}/status?status=${newStatus}`;
-            console.log('Making request to:', url);
-
-            fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success data:', data);
-                // Show success message
-                showToast('Status updated successfully!', 'success');
-
-                // Refresh the page to show updated data
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            })
-            .catch(error => {
-                console.error('Error updating status:', error);
-                showToast('Failed to update status. Please try again.', 'error');
-            });
+            updateStatusFromDrawer(newStatus, complaintId);
         }
 
         // Drawer functions
@@ -1136,7 +1395,7 @@
             const imageSection = document.getElementById('drawerImageSection');
             const imageElement = document.getElementById('drawerImage');
             if (complaint.imagePath && complaint.imagePath.trim()) {
-                imageElement.src = complaint.imagePath.startsWith('/static/') ? complaint.imagePath : `/static/${complaint.imagePath}`;
+                imageElement.src = complaint.imagePath.startsWith('/static/') || complaint.imagePath.startsWith('/uploads/') ? complaint.imagePath : `/static/${complaint.imagePath}`;
                 imageSection.style.display = 'block';
             } else {
                 imageSection.style.display = 'none';
@@ -1205,6 +1464,7 @@
                     statusBadge.textContent = newStatus;
                 }
                 
+                refreshDashboardData();
                 showToast('Status updated successfully!', 'success');
             })
             .catch(error => {
